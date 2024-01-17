@@ -1,11 +1,41 @@
-require('@nomiclabs/hardhat-waffle');
+require("@nomiclabs/hardhat-waffle");
 
 module.exports = {
-  solidity: '0.8.0',
+  solidity: "0.8.0",
   networks: {
     ropsten: {
-      url: 'https://eth-ropsten.alchemyapi.io/v2/z4WpA8UKgqnwbTYmrZu15yCOiijBKaRv',
-      accounts: ['2f99db8cdb04655028eee1dc98230925202f6b3e010e43fad2883b4bea90a1a3'],
+      url: process.env.ALCHEMY_API_HTTP,
+      accounts: [process.env.METAMASK_P_KEY],
     },
   },
 };
+
+// module.exports = {
+//   defaultNetwork: "sepolia",
+//   networks: {
+//     hardhat: {
+//     },
+//     sepolia: {
+//       url: "https://eth-sepolia.g.alchemy.com/v2/<key>",
+//       accounts: [privateKey1, privateKey2, ...]
+//     }
+//   },
+//   solidity: {
+//     version: "0.8.23",
+//     settings: {
+//       optimizer: {
+//         enabled: true,
+//         runs: 200
+//       }
+//     }
+//   },
+//   paths: {
+//     sources: "./contracts",
+//     tests: "./test",
+//     cache: "./cache",
+//     artifacts: "./artifacts"
+//   },
+//   mocha: {
+//     timeout: 40000
+//   }
+// }
