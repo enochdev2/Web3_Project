@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { ethers } from "ethers";
+import {ethers} from 'ethers'
 
 import { contractABI, contractAddress } from "../utils/constants";
 
 export const TransactionContext = React.createContext();
 
-const { ethereum } = window;
+const ethereum  = window.ethereum;
 
-const createEthereumContract = () => {
-  const provider = new ethers.providers.Web3Provider(ethereum);
+const createEthereumContract = async () => {
+  const provider = new ethers.providers.Web3Provider(ethereum)
   const signer = provider.getSigner();
   const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
 
   return transactionsContract;
 };
+
 
 export const TransactionsProvider = ({ children }) => {
   const [formData, setformData] = useState({ addressTo: "", amount: "", keyword: "", message: "" });
@@ -26,12 +27,13 @@ export const TransactionsProvider = ({ children }) => {
     setformData((prevState) => ({ ...prevState, [name]: e.target.value }));
   };
 
-  const getAllTransactions = async () => {
+  const getAllTransaction = async () => {
     try {
       if (ethereum) {
-        const transactionsContract = createEthereumContract();
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const transactionsContracts = new ethers.Contract(contractAddress, contractABI, provider);
 
-        const availableTransactions = await transactionsContract.getAllTransactions();
+        const availableTransactions = await transactionsContracts.getAllTransactions();
 
         const structuredTransactions = availableTransactions.map((transaction) => ({
           addressTo: transaction.receiver,
@@ -42,7 +44,7 @@ export const TransactionsProvider = ({ children }) => {
           amount: parseInt(transaction.amount._hex) / (10 ** 18)
         }));
 
-        console.log(structuredTransactions);
+        console.log(availableTransactions);
 
         setTransactions(structuredTransactions);
       } else {
@@ -62,7 +64,7 @@ export const TransactionsProvider = ({ children }) => {
       if (accounts.length) {
         setCurrentAccount(accounts[0]);
 
-        getAllTransactions();
+        getAllTransaction();
       } else {
         console.log("No accounts found");
       }
@@ -74,15 +76,16 @@ export const TransactionsProvider = ({ children }) => {
   const checkIfTransactionsExists = async () => {
     try {
       if (ethereum) {
-        const transactionsContract = createEthereumContract();
-        const currentTransactionCount = await transactionsContract.getTransactionCount();
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const transactionsContracts = new ethers.Contract(contractAddress, contractABI, provider);
+        const currentTransactionCount = await transactionsContracts.getTransactionCount();
+        const currentTransactionCounts = currentTransactionCount.toString()
 
-        window.localStorage.setItem("transactionCount", currentTransactionCount);
+        window.localStorage.setItem("transactionCount", currentTransactionCounts);
       }
     } catch (error) {
       console.log(error);
-
-      throw new Error("No ethereum object");
+      // throw new Error("No ethereum object");
     }
   };
 
@@ -96,7 +99,6 @@ export const TransactionsProvider = ({ children }) => {
       window.location.reload();
     } catch (error) {
       console.log(error);
-
       throw new Error("No ethereum object");
     }
   };

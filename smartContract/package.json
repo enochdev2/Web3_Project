@@ -1,5 +1,5 @@
 {
-  "name": "smart_contract",
+  "name": "smartcontract",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,9 +12,5 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "hardhat": "^2.19.4"
-  },
-  "dependencies": {
-    "@nomiclabs/hardhat-waffle": "^2.0.6",
-    "ethers": "^6.9.2"
   }
 }
