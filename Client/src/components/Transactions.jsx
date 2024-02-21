@@ -1,9 +1,7 @@
 import React, { useContext } from "react";
 
 import { TransactionContext } from "../context/TransactionContext";
-
-import useFetch from "../hooks/useFetch";
-import dummyData from "../utils/dummyData";
+import crypto from "../assets/crypto_transaction.jpg"
 import { shortenAddress } from "../utils/shortenAddress";
 
 const TransactionsCard = ({
@@ -11,11 +9,9 @@ const TransactionsCard = ({
   addressFrom,
   timestamp,
   message,
-  keyword,
   amount,
   url,
 }) => {
-  const gifUrl = useFetch({ keyword });
 
   return (
     <div
@@ -25,10 +21,15 @@ const TransactionsCard = ({
       sm:min-w-[270px]
       sm:max-w-[300px]
       min-w-full
-      flex-col p-3 rounded-md hover:shadow-2xl"
+      flex-col p-3 justify-center rounded-md hover:shadow-2xl relative"
     >
-      <div className="flex flex-col items-center w-full mt-3">
-        <div className="display-flex justify-start w-full mb-6 p-2">
+      <img
+        src={crypto || url}
+        alt="nature"
+        className="w-full h-full absolute -z-2 2xl:h-96 rounded-md shadow-lg object-cover"
+      />
+      <div className="flex flex-col z-10 bg-[#181918] items-center w-[95%]  m-auto px-3 py-4 border-[#37c7da] border-2 rounded-md">
+        <div className="display-flex z-10 justify-start w-full mb-6 p-2">
           <a
             href={`https://sepolia.etherscan.io/address/${addressFrom}`}
             target="_blank"
@@ -55,11 +56,6 @@ const TransactionsCard = ({
             </>
           )}
         </div>
-        <img
-          src={gifUrl || url}
-          alt="nature"
-          className="w-full h-64 2xl:h-96 rounded-md shadow-lg object-cover"
-        />
         <div className="bg-black p-3 px-5 w-max rounded-3xl -mt-5 shadow-2xl">
           <p className="text-[#37c7da] font-bold">{timestamp}</p>
         </div>
