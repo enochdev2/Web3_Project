@@ -1,26 +1,36 @@
 import React, { useEffect, useState } from "react";
-import {ethers} from 'ethers'
+import { ethers } from "ethers";
 
 import { contractABI, contractAddress } from "../utils/constants";
 
 export const TransactionContext = React.createContext();
 
-const ethereum  = window.ethereum;
+const ethereum = window.ethereum;
 
 const createEthereumContract = async () => {
-  const provider = new ethers.providers.Web3Provider(ethereum)
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
-  const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
+  const transactionsContract = new ethers.Contract(
+    contractAddress,
+    contractABI,
+    signer
+  );
 
   return transactionsContract;
 };
 
-
 export const TransactionsProvider = ({ children }) => {
-  const [formData, setformData] = useState({ addressTo: "", amount: "", keyword: "", message: "" });
+  const [formData, setformData] = useState({
+    addressTo: "",
+    amount: "",
+    keyword: "",
+    message: "",
+  });
   const [currentAccount, setCurrentAccount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [transactionCount, setTransactionCount] = useState(localStorage.getItem("transactionCount"));
+  const [transactionCount, setTransactionCount] = useState(
+    localStorage.getItem("transactionCount")
+  );
   const [transactions, setTransactions] = useState([]);
 
   const handleChange = (e, name) => {
@@ -30,19 +40,32 @@ export const TransactionsProvider = ({ children }) => {
   const getAllTransaction = async () => {
     try {
       if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum)
-        const transactionsContracts = new ethers.Contract(contractAddress, contractABI, provider);
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const transactionsContracts = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          provider
+        );
 
-        const availableTransactions = await transactionsContracts.getAllTransactions();
+        const availableTransactions =
+          await transactionsContracts.getAllTransactions();
 
-        const structuredTransactions = availableTransactions.map((transaction) => ({
-          addressTo: transaction.receiver,
-          addressFrom: transaction.sender,
-          timestamp: new Date(transaction.timestamp.toNumber() * 1000).toLocaleString(),
-          message: transaction.message,
-          keyword: transaction.keyword,
-          amount: parseInt(transaction.amount._hex) / (10 ** 18)
-        }));
+        const structuredTransactions = availableTransactions.map(
+          (transaction) => ({
+            addressTo: transaction.receiver,
+            addressFrom: transaction.sender,
+            timestamp: new Date(
+              transaction.timestamp.toNumber() * 1000
+            ).toLocaleString(),
+            message: transaction.message,
+            keyword: transaction.keyword,
+            amount: parseInt(transaction.amount._hex) / 10 ** 18,
+          })
+        );
+        console.log(
+          "🚀 ~ structuredTransactions ~ structuredTransactions:",
+          structuredTransactions
+        );
 
         console.log(availableTransactions);
 
@@ -76,12 +99,20 @@ export const TransactionsProvider = ({ children }) => {
   const checkIfTransactionsExists = async () => {
     try {
       if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum)
-        const transactionsContracts = new ethers.Contract(contractAddress, contractABI, provider);
-        const currentTransactionCount = await transactionsContracts.getTransactionCount();
-        const currentTransactionCounts = currentTransactionCount.toString()
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const transactionsContracts = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          provider
+        );
+        const currentTransactionCount =
+          await transactionsContracts.getTransactionCount();
+        const currentTransactionCounts = currentTransactionCount.toString();
 
-        window.localStorage.setItem("transactionCount", currentTransactionCounts);
+        window.localStorage.setItem(
+          "transactionCount",
+          currentTransactionCounts
+        );
       }
     } catch (error) {
       console.log(error);
@@ -93,7 +124,9 @@ export const TransactionsProvider = ({ children }) => {
     try {
       if (!ethereum) return alert("Please install MetaMask.");
 
-      const accounts = await ethereum.request({ method: "eth_requestAccounts", });
+      const accounts = await ethereum.request({
+        method: "eth_requestAccounts",
+      });
 
       setCurrentAccount(accounts[0]);
       window.location.reload();
@@ -106,21 +139,37 @@ export const TransactionsProvider = ({ children }) => {
   const sendTransaction = async () => {
     try {
       if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const transact = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
         const { addressTo, amount, keyword, message } = formData;
-        const transactionsContract = createEthereumContract();
+
         const parsedAmount = ethers.utils.parseEther(amount);
+        const transactionHash = await transact.addToBlockchain(
+          addressTo,
+          parsedAmount,
+          message,
+          keyword
+        );
 
-        await ethereum.request({
-          method: "eth_sendTransaction",
-          params: [{
-            from: currentAccount,
-            to: addressTo,
-            gas: "0x5208",
-            value: parsedAmount._hex,
-          }],
-        });
+        console.log(
+          "🚀 ~ sendTransaction ~ transactionHash :",
+          transactionHash
+        );
 
-        const transactionHash = await transactionsContract.addToBlockchain(addressTo, parsedAmount, message, keyword);
+        // await ethereum.request({
+        //   method: "eth_sendTransaction",
+        //   params: [{
+        //     from: currentAccount,
+        //     to: addressTo,
+        //     gas: "0x5208",
+        //     value: parsedAmount._hex,
+        //   }],
+        // });
 
         setIsLoading(true);
         console.log(`Loading - ${transactionHash.hash}`);
@@ -128,7 +177,8 @@ export const TransactionsProvider = ({ children }) => {
         console.log(`Success - ${transactionHash.hash}`);
         setIsLoading(false);
 
-        const transactionsCount = await transactionsContract.getTransactionCount();
+        const transactionsCount =
+          await transactionsContract.getTransactionCount();
 
         setTransactionCount(transactionsCount.toNumber());
         window.location.reload();
