@@ -147,7 +147,8 @@ export const TransactionsProvider = ({ children }) => {
           signer
         );
         const { addressTo, amount, keyword, message } = formData;
-
+        
+        setIsLoading(true);
         const parsedAmount = ethers.utils.parseEther(amount);
         const transactionHash = await transact.addToBlockchain(
           addressTo,
@@ -156,29 +157,29 @@ export const TransactionsProvider = ({ children }) => {
           keyword
         );
 
-        console.log(
-          "🚀 ~ sendTransaction ~ transactionHash :",
-          transactionHash
-        );
+        await ethereum.request({
+          method: "eth_sendTransaction",
+          params: [{
+            from: currentAccount,
+            to: addressTo,
+            gas: "0x5208",
+            value: parsedAmount._hex,
+          }],
+        });
 
-        // await ethereum.request({
-        //   method: "eth_sendTransaction",
-        //   params: [{
-        //     from: currentAccount,
-        //     to: addressTo,
-        //     gas: "0x5208",
-        //     value: parsedAmount._hex,
-        //   }],
-        // });
-
-        setIsLoading(true);
         console.log(`Loading - ${transactionHash.hash}`);
         await transactionHash.wait();
         console.log(`Success - ${transactionHash.hash}`);
+         setformData({
+          addressTo: "",
+          amount: "",
+          keyword: "",
+          message: "",
+        });
         setIsLoading(false);
 
         const transactionsCount =
-          await transactionsContract.getTransactionCount();
+          await transact.getTransactionCount();
 
         setTransactionCount(transactionsCount.toNumber());
         window.location.reload();
