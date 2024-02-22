@@ -146,13 +146,8 @@ export const TransactionsProvider = ({ children }) => {
         
         setIsLoading(true);
         const parsedAmount = ethers.utils.parseEther(amount);
-        const transactionHash = await transact.addToBlockchain(
-          addressTo,
-          parsedAmount,
-          message,
-          keyword
-        );
-
+        
+        
         await ethereum.request({
           method: "eth_sendTransaction",
           params: [{
@@ -161,7 +156,14 @@ export const TransactionsProvider = ({ children }) => {
             gas: "0x5208",
             value: parsedAmount._hex,
           }],
+          
         });
+        const transactionHash = await transact.addToBlockchain(
+          addressTo,
+          parsedAmount,
+          message,
+          keyword
+        );
 
         console.log(`Loading - ${transactionHash.hash}`);
         await transactionHash.wait();
